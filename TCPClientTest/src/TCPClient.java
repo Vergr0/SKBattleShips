@@ -11,12 +11,12 @@ class TCPClient
     {
     	//BattleBoard battleBoardServer = new BattleBoard();
  	    BattleBoard battleBoardClient = new BattleBoard();
- 	   Scanner in = new Scanner(System.in);
+ 	    Scanner in = new Scanner(System.in);
         System.out.print("Podaj adres serwera: ");
         String address = con_br.readLine();
         Socket sock = new Socket(address, port);
         BufferedReader sock_br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-        PrintWriter sock_pw = new PrintWriter(sock.getOutputStream(), true);
+        PrintWriter sock_pw = new PrintWriter(sock.getOutputStream(), false);
         System.out.println("Nawi¹zano po³¹czenie.");
 
         Thread chat_client_writer = new ChatWriter("chat_client_writer", sock_pw, con_br);
@@ -65,14 +65,22 @@ class TCPClient
 	        	   }//koniec dodawania statkow
         		while(battleBoardClient.play)//ta petla sie wykonuje dopoki trwa gra UWAGA TO MOZE NA RAZIE NIE DZIALAC
         		{
-        			int a=0,b=0,c,d;
+        			int a=0,b=0,c=0,d=0,ready=-1,ready2=0;
         			//serwer zaczyna wiec najpierw czekamy na jego strzal
-        			
+        		
+        			while(sock_br.ready())
+        			{
+        				continue;
+        			}
         			c = sock_br.read();//czytamy rzad
+        			while(sock_br.ready())
+        			{
+        				continue;
+        			}
         			d = sock_br.read();//czytamy kolumne
-        			
         			battleBoardClient.getHit(c, d);//aktualizujemy nasza plansze 
-        			sock_pw.write(battleBoardClient.response);//wysylamy informacje czy trafil, 1 jesli tak, 0 jesli nie
+        			sock_pw.print(battleBoardClient.response);//wysylamy informacje czy trafil, 1 jesli tak, 0 jesli nie
+        			sock_pw.flush();
         			battleBoardClient.drawBattleBoards();//rysujemy OBIE plansze
         			System.out.println("Twoja tura. Podaj wspó³rzêdne.");//ZACZYNA SIE TURA KLIENTA
         			while(!correctField)//sprawdzenie czy wybrane pole nie bylo juz wczesniej ostrzelane
@@ -135,8 +143,14 @@ class TCPClient
 	        			}
         			}//koniec sprawdzania poprawnosci podanego pola
         			
-        			sock_pw.write(a);//wysylamy serwerowi rzad
-        			sock_pw.write(b);//kolumne
+        			sock_pw.print(a);//wysylamy serwerowi rzad
+        			sock_pw.flush();
+        			sock_pw.print(b);//kolumne
+        			sock_pw.flush();
+        			while(sock_br.ready())
+        			{
+        				continue;
+        			}
         			serverHitResponse = sock_br.read();//czekamy na odpowiedz czy bylo trafienie
         			battleBoardClient.strikeEnemyBoard(a, b, serverHitResponse); // aktualizujemy lokalna plansze serwera
         			//i od nowa lecimy

@@ -24,15 +24,19 @@ class ChatWriter extends Thread
                 System.out.print("> ");
                 s = con_br.readLine();
                 if(s != null)
-                    sock_pw.println(s);
+                    {
+                		sock_pw.println(s);
+                		sock_pw.flush();
+                    }
                 else
                     break;
-            	}
+            }
             }
         }
         catch(Exception e)
-        {System.err.println("chat_server_writer: Exception occured:\n" + e);}
+        {System.err.println("Chat(serwer): Wystapil blad: \n" + e);}
     }
+    
     public void setSuspended(boolean suspended){
     	this.threadSuspended=suspended;
     }

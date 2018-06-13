@@ -21,12 +21,14 @@ class TCPSerwer
         System.out.println("<Serwer>: Nawi¹zano po³¹czenie.");
 
         BufferedReader csock_br = new BufferedReader(new InputStreamReader(csock.getInputStream()));
-        PrintWriter csock_pw = new PrintWriter(csock.getOutputStream(), true);
+        PrintWriter csock_pw = new PrintWriter(csock.getOutputStream(), false);
 
         Thread chat_server_writer = new ChatWriter("chat_server_writer", csock_pw, con_br);
         chat_server_writer.start();
         csock_pw.println("Napisz: \"END\" by zakoñczyæ po³¹czenie.");
+        csock_pw.flush();
         csock_pw.println("Czy chcesz rozpocz¹æ rozgrywkê?");
+        csock_pw.flush();
         String s;
         boolean correctDirection,correctRow=false,correctColumn=false,correctField=false;
         int clientHitResponse;
@@ -34,6 +36,7 @@ class TCPSerwer
         {
         	if(s.contains("tak")){
         		csock_pw.println("tak");
+        		csock_pw.flush();
         		((ChatWriter) chat_server_writer).setSuspended(true);
         		while(battleBoardServer.shipCounter<6)//dodawn1atkow dla serwera
 	        	   {
@@ -71,7 +74,7 @@ class TCPSerwer
 	        	   }
         		while(battleBoardServer.play)//ta petla sie wykonuje dopoki trwa gra
         		{
-        			int a=0,b=0,c,d;
+        			int a=0,b=0,c=0,d=0,ready=0,ready2=0;
         			battleBoardServer.drawBattleBoards();//rysujemy OBIE plansze
         			System.out.println("Twoja tura. Podaj wspó³rzêdne.");
         			while(!correctField)//sprawdzenie czy wybrane pole nie bylo juz wczesniej ostrzelane
@@ -120,7 +123,7 @@ class TCPSerwer
                 			}
             				else
             				{
-            					correctRow = true;
+            					correctColumn = true;
             				}
 	            			
 	        			}
@@ -133,19 +136,35 @@ class TCPSerwer
 	        				correctField = true;
 	        			}
         			}//koniec sprawdzania poprawnosci podanego pola UWAGA OD NASTEPNEJ LINIJKI MOZE NIE DZIALAC
-        			csock_pw.write(a);//wysylanie wspolrzednych uderzenia do klienta
-        			csock_pw.write(b);
+        			csock_pw.print(a);//wysylanie wspolrzednych uderzenia do klienta
+        			csock_pw.flush();
+        			csock_pw.print(b);
+        			csock_pw.flush();
+        			//DataOutputStream.
         			//Oczekiwanie na odpowiedz klienta, czy uderzenie trafilo
+        			while(csock_br.ready())
+        			{
+        				continue;
+        			}
         			clientHitResponse = csock_br.read();
-        			
         			battleBoardServer.strikeEnemyBoard(a, b, clientHitResponse);//akutalizacja lokalnej planszy klienta
         			//START TURY KLIENTA
         			//OCZEKIWANIE NA JEGO STRZAL
+        			
+        			while(csock_br.ready())
+        			{
+        				continue;
+        			}
         			c=csock_br.read();//zczytanie rzedu
+        			while(csock_br.ready())
+        			{
+        				continue;
+        			}
         			d=csock_br.read();//zczytanie kolumny
         			
+     
         			battleBoardServer.getHit(c, d);//aktualizacja lokalnej planszy serwera
-        			csock_pw.write(battleBoardServer.response);//wyslanie odpowiedzi o trafieniu do klienta
+        			csock_pw.print(battleBoardServer.response);//wyslanie odpowiedzi o trafieniu do klienta
         			
         		}
         		battleBoardServer.ready=true;
