@@ -77,7 +77,7 @@ class TCPSerwer
         			correctRow=false;
         			correctColumn=false;
         			correctField=false;
-        			int a=0,b=0,c=0,d=0,ready=0,ready2=0;
+        			int a=0,b=0,c=0,d=0;//,ready=0,ready2=0;
         			battleBoardServer.drawBattleBoards();//rysujemy OBIE plansze
         			System.out.println("Twoja tura. Podaj wspó³rzêdne.");
         			while(!correctField)//sprawdzenie czy wybrane pole nie bylo juz wczesniej ostrzelane
@@ -133,6 +133,8 @@ class TCPSerwer
 	        			if(battleBoardServer.enemyBoard[a][b]=='*' || battleBoardServer.enemyBoard[a][b]=='X')
 	        			{
 	        				System.out.println("To pole by³o ju¿ ostrzelane, wybierz inne.");
+	        				correctColumn = false;
+	        				correctRow = false;
 	        			}
 	        			else
 	        			{
@@ -141,32 +143,49 @@ class TCPSerwer
         			}//koniec sprawdzania poprawnosci podanego pola UWAGA OD NASTEPNEJ LINIJKI MOZE NIE DZIALAC
         			csock_pw.println(Integer.toString(a));//wysylanie wspolrzednych uderzenia do klienta
         			csock_pw.flush();
-        			csock_pw.print(Integer.toString(b));
+        			csock_pw.println(Integer.toString(b));
         			csock_pw.flush();
         			//DataOutputStream.
         			//Oczekiwanie na odpowiedz klienta, czy uderzenie trafilo
-        			clientHitResponse = Integer.parseInt(csock_br.readLine());
-        			battleBoardServer.strikeEnemyBoard(a, b, clientHitResponse);//akutalizacja lokalnej planszy klienta
-        			//START TURY KLIENTA
-        			//OCZEKIWANIE NA JEGO STRZAL
-        			
-        			/*while(csock_br.ready())
+        			while(!csock_br.ready())
         			{
         				try {
-							Thread.sleep(3000);
-							System.out.println("oczekiwanie na ruch przeciwnika");
+							Thread.sleep(10);
         				} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-        				
-        			}*/
+        			}
+        			clientHitResponse = Integer.parseInt(csock_br.readLine());
+        			battleBoardServer.strikeEnemyBoard(a, b, clientHitResponse);//akutalizacja lokalnej planszy klienta
+        			//START TURY KLIENTA
+        			//OCZEKIWANIE NA JEGO STRZAL
+        		
+        			while(!csock_br.ready())
+        			{
+        				try {
+							Thread.sleep(3000);
+							System.out.println("Oczekiwanie na ruch przeciwnika");
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        			}
         			c=Integer.parseInt(csock_br.readLine());//zczytanie rzedu
+        			while(!csock_br.ready())
+        			{
+        				try {
+							Thread.sleep(10);
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        			}
         			d=Integer.parseInt(csock_br.readLine());//zczytanie kolumny
         			
      
         			battleBoardServer.getHit(c, d);//aktualizacja lokalnej planszy serwera
-        			csock_pw.println(battleBoardServer.response);//wyslanie odpowiedzi o trafieniu do klienta
+        			csock_pw.println(Integer.toString(battleBoardServer.response));//wyslanie odpowiedzi o trafieniu do klienta
         			
         		}
         		battleBoardServer.ready=true;

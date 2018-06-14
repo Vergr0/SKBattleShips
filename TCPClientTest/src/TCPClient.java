@@ -70,8 +70,8 @@ class TCPClient
         			correctRow=false;
         			correctColumn=false;
         			correctField=false;
-        			/*
-        			while(sock_br.ready())
+        			
+        			while(!sock_br.ready())
         			{
         				try {
 							Thread.sleep(3000);
@@ -80,8 +80,17 @@ class TCPClient
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-        			}*/
+        			}
         			c = Integer.parseInt(sock_br.readLine());//czytamy rzad
+        			while(!sock_br.ready())
+        			{
+        				try {
+							Thread.sleep(10);
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        			}
         			d = Integer.parseInt(sock_br.readLine());//czytamy kolumne
         			battleBoardClient.getHit(c, d);//aktualizujemy nasza plansze 
         			sock_pw.println(Integer.toString(battleBoardClient.response));//wysylamy informacje czy trafil, 1 jesli tak, 0 jesli nie
@@ -141,6 +150,8 @@ class TCPClient
 	        			if(battleBoardClient.enemyBoard[a][b]=='*' || battleBoardClient.enemyBoard[a][b]=='X')
 	        			{
 	        				System.out.println("To pole by³o ju¿ ostrzelane, wybierz inne.");
+	        				correctColumn = false;
+	        				correctRow = false;
 	        			}
 	        			else
 	        			{
@@ -152,7 +163,15 @@ class TCPClient
         			sock_pw.flush();
         			sock_pw.println(Integer.toString(b));//kolumne
         			sock_pw.flush();
-
+        			while(!sock_br.ready())
+        			{
+        				try {
+							Thread.sleep(10);
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        			}
         			serverHitResponse = Integer.parseInt(sock_br.readLine());//czekamy na odpowiedz czy bylo trafienie
         			battleBoardClient.strikeEnemyBoard(a, b, serverHitResponse); // aktualizujemy lokalna plansze serwera
         			//i od nowa lecimy

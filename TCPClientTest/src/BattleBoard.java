@@ -2,7 +2,7 @@
 public class BattleBoard
 {
 	boolean ready=false,play = true;
-	int response;
+	public int response;
 	int count = 0,enemyCount = 15;
 	char [][] battleBoard = new char[10][10];
 	char [][] enemyBoard = new char[10][10];
@@ -200,8 +200,10 @@ public class BattleBoard
 				}
 			}
 			else
+			{
 				System.out.println("Pud³o");
 				enemyBoard[row][column]='X';
+			}
 		
 		
 	}
@@ -217,6 +219,7 @@ public class BattleBoard
 		else
 		{
 			battleBoard[row][column] = 'X';
+			System.out.println("Przeciwnik spud³owa³");
 			response = 0;
 		}
 		if(count==0)
