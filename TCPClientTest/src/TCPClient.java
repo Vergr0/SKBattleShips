@@ -19,16 +19,16 @@ class TCPClient
         PrintWriter sock_pw = new PrintWriter(sock.getOutputStream(), false);
         System.out.println("Nawi¹zano po³¹czenie.");
 
-        Thread chat_client_writer = new ChatWriter("chat_client_writer", sock_pw, con_br);
-        chat_client_writer.start();
+        //Thread chat_client_writer = new ChatWriter("chat_client_writer", sock_pw, con_br);
+        //chat_client_writer.start();
         boolean correctDirection,correctRow=false,correctColumn=false,correctField=false;
         int serverHitResponse;
         String s;
-        while((s = sock_br.readLine()) != null)
+        while(true)
         {
-        	if(s.contains("tak")){
+        	//if(s.contains("tak")){
         		battleBoardClient.initBattleBoard();
-        		((ChatWriter) chat_client_writer).setSuspended(true);
+        		///((ChatWriter) chat_client_writer).setSuspended(true);
         		while(battleBoardClient.shipCounter<6)//dodawn1atkow dla klienta
 	        	   {
         			   battleBoardClient.drawOwnBoard();
@@ -65,21 +65,26 @@ class TCPClient
 	        	   }//koniec dodawania statkow
         		while(battleBoardClient.play)//ta petla sie wykonuje dopoki trwa gra UWAGA TO MOZE NA RAZIE NIE DZIALAC
         		{
-        			int a=0,b=0,c=0,d=0,ready=-1,ready2=0;
+        			int a=0,b=0,c=0,d=0;//,ready=-1,ready2=0;
         			//serwer zaczyna wiec najpierw czekamy na jego strzal
-        		
+        			correctRow=false;
+        			correctColumn=false;
+        			correctField=false;
+        			/*
         			while(sock_br.ready())
         			{
-        				continue;
-        			}
-        			c = sock_br.read();//czytamy rzad
-        			while(sock_br.ready())
-        			{
-        				continue;
-        			}
-        			d = sock_br.read();//czytamy kolumne
+        				try {
+							Thread.sleep(3000);
+							System.out.println("oczekiwanie na ruch przeciwnika");
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        			}*/
+        			c = Integer.parseInt(sock_br.readLine());//czytamy rzad
+        			d = Integer.parseInt(sock_br.readLine());//czytamy kolumne
         			battleBoardClient.getHit(c, d);//aktualizujemy nasza plansze 
-        			sock_pw.print(battleBoardClient.response);//wysylamy informacje czy trafil, 1 jesli tak, 0 jesli nie
+        			sock_pw.println(Integer.toString(battleBoardClient.response));//wysylamy informacje czy trafil, 1 jesli tak, 0 jesli nie
         			sock_pw.flush();
         			battleBoardClient.drawBattleBoards();//rysujemy OBIE plansze
         			System.out.println("Twoja tura. Podaj wspó³rzêdne.");//ZACZYNA SIE TURA KLIENTA
@@ -129,7 +134,7 @@ class TCPClient
                 			}
             				else
             				{
-            					correctRow = true;
+            					correctColumn = true;
             				}
 	            			
 	        			}
@@ -143,27 +148,24 @@ class TCPClient
 	        			}
         			}//koniec sprawdzania poprawnosci podanego pola
         			
-        			sock_pw.print(a);//wysylamy serwerowi rzad
+        			sock_pw.println(Integer.toString(a));//wysylamy serwerowi rzad
         			sock_pw.flush();
-        			sock_pw.print(b);//kolumne
+        			sock_pw.println(Integer.toString(b));//kolumne
         			sock_pw.flush();
-        			while(sock_br.ready())
-        			{
-        				continue;
-        			}
-        			serverHitResponse = sock_br.read();//czekamy na odpowiedz czy bylo trafienie
+
+        			serverHitResponse = Integer.parseInt(sock_br.readLine());//czekamy na odpowiedz czy bylo trafienie
         			battleBoardClient.strikeEnemyBoard(a, b, serverHitResponse); // aktualizujemy lokalna plansze serwera
         			//i od nowa lecimy
         		
         		}
         		
         		battleBoardClient.shipCounter = 0;
-        		battleBoardClient.ready=true;
-        		((ChatWriter) chat_client_writer).setSuspended(false);
-        	}
-            System.out.println("\rserver: " + s);
-            if(battleBoardClient.ready==true)  battleBoardClient.drawBattleBoards();
+        		//battleBoardClient.ready=true;
+        		//((ChatWriter) chat_client_writer).setSuspended(false);
+        	//}
+            //System.out.println("\rserver: " + s);
+            //if(battleBoardClient.ready==true)  battleBoardClient.drawBattleBoards();
         }
-        sock.close();
+        //sock.close();
     }
 }

@@ -23,21 +23,21 @@ class TCPSerwer
         BufferedReader csock_br = new BufferedReader(new InputStreamReader(csock.getInputStream()));
         PrintWriter csock_pw = new PrintWriter(csock.getOutputStream(), false);
 
-        Thread chat_server_writer = new ChatWriter("chat_server_writer", csock_pw, con_br);
-        chat_server_writer.start();
-        csock_pw.println("Napisz: \"END\" by zakoñczyæ po³¹czenie.");
-        csock_pw.flush();
-        csock_pw.println("Czy chcesz rozpocz¹æ rozgrywkê?");
-        csock_pw.flush();
+        //Thread chat_server_writer = new ChatWriter("chat_server_writer", csock_pw, con_br);
+        //chat_server_writer.start();
+        //csock_pw.println("Napisz: \"END\" by zakoñczyæ po³¹czenie.");
+        //csock_pw.flush();
+        //csock_pw.println("Czy chcesz rozpocz¹æ rozgrywkê?");
+        //csock_pw.flush();
         String s;
         boolean correctDirection,correctRow=false,correctColumn=false,correctField=false;
         int clientHitResponse;
-        while((s = csock_br.readLine()) != null)
+        while(true)
         {
-        	if(s.contains("tak")){
-        		csock_pw.println("tak");
-        		csock_pw.flush();
-        		((ChatWriter) chat_server_writer).setSuspended(true);
+        	//if(s.contains("tak")){
+        		//csock_pw.println("tak");
+        		//csock_pw.flush();
+        		//((ChatWriter) chat_server_writer).setSuspended(true);
         		while(battleBoardServer.shipCounter<6)//dodawn1atkow dla serwera
 	        	   {
         			battleBoardServer.drawOwnBoard();
@@ -74,6 +74,9 @@ class TCPSerwer
 	        	   }
         		while(battleBoardServer.play)//ta petla sie wykonuje dopoki trwa gra
         		{
+        			correctRow=false;
+        			correctColumn=false;
+        			correctField=false;
         			int a=0,b=0,c=0,d=0,ready=0,ready2=0;
         			battleBoardServer.drawBattleBoards();//rysujemy OBIE plansze
         			System.out.println("Twoja tura. Podaj wspó³rzêdne.");
@@ -136,46 +139,45 @@ class TCPSerwer
 	        				correctField = true;
 	        			}
         			}//koniec sprawdzania poprawnosci podanego pola UWAGA OD NASTEPNEJ LINIJKI MOZE NIE DZIALAC
-        			csock_pw.print(a);//wysylanie wspolrzednych uderzenia do klienta
+        			csock_pw.println(Integer.toString(a));//wysylanie wspolrzednych uderzenia do klienta
         			csock_pw.flush();
-        			csock_pw.print(b);
+        			csock_pw.print(Integer.toString(b));
         			csock_pw.flush();
         			//DataOutputStream.
         			//Oczekiwanie na odpowiedz klienta, czy uderzenie trafilo
-        			while(csock_br.ready())
-        			{
-        				continue;
-        			}
-        			clientHitResponse = csock_br.read();
+        			clientHitResponse = Integer.parseInt(csock_br.readLine());
         			battleBoardServer.strikeEnemyBoard(a, b, clientHitResponse);//akutalizacja lokalnej planszy klienta
         			//START TURY KLIENTA
         			//OCZEKIWANIE NA JEGO STRZAL
         			
-        			while(csock_br.ready())
+        			/*while(csock_br.ready())
         			{
-        				continue;
-        			}
-        			c=csock_br.read();//zczytanie rzedu
-        			while(csock_br.ready())
-        			{
-        				continue;
-        			}
-        			d=csock_br.read();//zczytanie kolumny
+        				try {
+							Thread.sleep(3000);
+							System.out.println("oczekiwanie na ruch przeciwnika");
+        				} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        				
+        			}*/
+        			c=Integer.parseInt(csock_br.readLine());//zczytanie rzedu
+        			d=Integer.parseInt(csock_br.readLine());//zczytanie kolumny
         			
      
         			battleBoardServer.getHit(c, d);//aktualizacja lokalnej planszy serwera
-        			csock_pw.print(battleBoardServer.response);//wyslanie odpowiedzi o trafieniu do klienta
+        			csock_pw.println(battleBoardServer.response);//wyslanie odpowiedzi o trafieniu do klienta
         			
         		}
         		battleBoardServer.ready=true;
-        		((ChatWriter) chat_server_writer).setSuspended(false);
-        	}
-            System.out.println("\rclient: " + s);
-            System.out.print("> ");
-            if(battleBoardServer.ready==true)  battleBoardServer.drawBattleBoards();
+        		//((ChatWriter) chat_server_writer).setSuspended(false);
+        	//}
+            //System.out.println("\rclient: " + s);
+            //System.out.print("> ");
+            //if(battleBoardServer.ready==true)  battleBoardServer.drawBattleBoards();
         }
-        System.out.println("\rserver: Client has disconnected");
-        csock.close();
-        ssock.close();
+       // System.out.println("\rserver: Client has disconnected");
+       // csock.close();
+       // ssock.close();
     }
 }
